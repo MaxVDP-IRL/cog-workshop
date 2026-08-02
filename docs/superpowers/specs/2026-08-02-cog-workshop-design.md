@@ -36,6 +36,10 @@ Three games ("benches") in one app, sharing a single shell.
 Build order is Robot → Lightbulbs → Marbles. Each is shippable on its own, so
 Oskar is playing the robot game before the other two exist.
 
+**The first implementation plan covers the shared shell plus Teach the Robot
+only.** The Lightbulb Machine and Marble Machine each get their own plan
+afterwards, written against this same spec.
+
 ## Shared shell
 
 **Home screen:** three large picture tiles — a robot, a row of lightbulbs, a
@@ -64,8 +68,9 @@ apps.
 
 - **Top half:** a small grid world (roughly 4x4 to 6x6) with the robot at one
   end and a star to reach, plus walls/obstacles.
-- **Bottom half:** an empty **program strip** with a fixed number of slots, and
-  a row of large arrow buttons.
+- **Bottom half:** an empty **program strip** and a row of large arrow buttons.
+  The number of slots in the strip is set per level, and is part of the level
+  definition.
 
 ### Interaction
 
@@ -82,9 +87,11 @@ learned without the word being used.
 
 ### Progression
 
-1. **Straight lines** — forward only. Establishes that a program is a list run
-   in order. Counting the steps is the maths content.
-2. **Corners** — all four directions, with obstacles to route around.
+1. **Straight lines** — a single arrow direction is available, so the only
+   decision is how many steps. Establishes that a program is a list run in
+   order. Counting the steps is the maths content.
+2. **Corners** — all four arrow directions available, with obstacles to route
+   around.
 3. **Repeat** — a repeat tile with a number dial wrapping a short sequence
    ("these 2 steps, 3 times"). Multiplication made observable. The program
    strip has limited slots, so repeats become necessary rather than optional.
