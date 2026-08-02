@@ -2123,7 +2123,7 @@ This is the heart of the game. It builds a program, hands it to the engine, and 
 
 - [ ] **Step 1: Write the component**
 
-Note the repeat-tile interaction: tapping 🔁 wraps the **last move tile already in the strip** into a repeat, and tapping 🔁 again on the same repeat increases its count. That avoids a modal dial, which would be fiddly at 5.
+Note the repeat-tile interaction: tapping 🔁 wraps the **last one or two move tiles already in the strip** into a repeat (two only when both trailing tiles are plain, not-yet-repeated moves — this is what makes a 2-move "zigzag" body like `w3-4`'s buildable), and tapping 🔁 again on the same repeat increases its count. That avoids a modal dial, which would be fiddly at 5.
 
 ```svelte
 <script lang="ts">
@@ -2150,6 +2150,8 @@ Note the repeat-tile interaction: tapping 🔁 wraps the **last move tile alread
   let program: Instruction[] = $state([]);
   let mini: MoveInstruction[] = $state([]);
   let editingMini = $state(false);
+  // svelte-ignore state_referenced_locally — initial capture only; the
+  // $effect below reassigns robotAt via reset() on every level change.
   let robotAt: Cell = $state({ ...level.start });
   let activePath: number[] | null = $state(null);
   let crashPath: number[] | null = $state(null);
@@ -2187,7 +2189,13 @@ Note the repeat-tile interaction: tapping 🔁 wraps the **last move tile alread
     }
   };
 
-  /** Wrap the last move into a repeat, or bump an existing repeat's count. */
+  /**
+   * Wrap the last one or two moves already in the strip into a repeat, or
+   * bump an existing repeat's count. Wrapping two moves (rather than one)
+   * happens only when the last two tiles are both plain, not-yet-repeated
+   * moves — this is what lets a "zigzag" body like [right, up] be built,
+   * without ever needing a modal dial.
+   */
   const addRepeat = () => {
     if (running || editingMini || program.length === 0) return;
     crashPath = null;
@@ -2195,9 +2203,17 @@ Note the repeat-tile interaction: tapping 🔁 wraps the **last move tile alread
     if (last.kind === 'repeat') {
       const bumped: Instruction = { ...last, times: Math.min(9, last.times + 1) };
       program = [...program.slice(0, -1), bumped];
-    } else if (last.kind === 'move') {
-      const wrapped: Instruction = { kind: 'repeat', times: 2, body: [last] };
-      program = [...program.slice(0, -1), wrapped];
+      return;
+    }
+    if (last.kind === 'move') {
+      const secondLast = program.length >= 2 ? program[program.length - 2] : null;
+      if (secondLast && secondLast.kind === 'move') {
+        const wrapped: Instruction = { kind: 'repeat', times: 2, body: [secondLast, last] };
+        program = [...program.slice(0, -2), wrapped];
+      } else {
+        const wrapped: Instruction = { kind: 'repeat', times: 2, body: [last] };
+        program = [...program.slice(0, -1), wrapped];
+      }
     }
   };
 
@@ -2258,10 +2274,13 @@ Note the repeat-tile interaction: tapping 🔁 wraps the **last move tile alread
 
 <section class="level">
   <header>
-    <button type="button" class="back" onclick={onback} aria-label="back to the levels">⬅️</button>
+    <button
+      type="button" class="back" disabled={running}
+      onclick={onback} aria-label="back to the levels"
+    >⬅️</button>
     {#if level.miniSlots > 0}
       <button
-        type="button" class="tab" class:on={editingMini}
+        type="button" class="tab" class:on={editingMini} disabled={running}
         onclick={() => (editingMini = !editingMini)}
         aria-label={editingMini ? 'edit the main program' : 'edit the mini program'}
       >🧩</button>
@@ -2322,6 +2341,8 @@ Note the repeat-tile interaction: tapping 🔁 wraps the **last move tile alread
   }
 
   .tab.on { background: var(--accent-bg); border: 2px solid var(--accent); }
+
+  .back:disabled, .tab:disabled { opacity: 0.35; }
 
   .par {
     margin-left: auto;
