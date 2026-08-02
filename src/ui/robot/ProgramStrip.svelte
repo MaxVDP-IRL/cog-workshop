@@ -28,11 +28,10 @@
   const empties = $derived(Math.max(0, slots - program.length));
 </script>
 
-<div class="strip" role="list">
+<div class="strip" role="group">
   {#each program as tile, i (i)}
     <button
       type="button"
-      role="listitem"
       class="tile"
       class:active={activePath?.[0] === i}
       class:crashed={crashPath?.[0] === i}

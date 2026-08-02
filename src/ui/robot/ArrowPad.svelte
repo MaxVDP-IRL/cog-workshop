@@ -43,7 +43,7 @@
 
     {#if repeatAllowed}
       <button
-        type="button" class="key special" disabled={full || running}
+        type="button" class="key special" disabled={running}
         onclick={onrepeat} aria-label="add a repeat"
       >🔁</button>
     {/if}
