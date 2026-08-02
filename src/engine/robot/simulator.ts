@@ -35,10 +35,21 @@ export const run = (level: Level, program: Instruction[]): Trace => {
 
   for (let i = 0; i < program.length; i++) {
     const instruction = program[i];
+
     if (instruction.kind === 'move') {
       const result = applyMove(instruction, [i]);
       if (result === 'goal') return { steps, end: at, status: 'goal', crashAt: null };
       if (result === 'crashed') return { steps, end: at, status: 'crashed', crashAt: [i] };
+    }
+
+    if (instruction.kind === 'repeat') {
+      for (let iteration = 0; iteration < instruction.times; iteration++) {
+        for (let b = 0; b < instruction.body.length; b++) {
+          const result = applyMove(instruction.body[b], [i, b]);
+          if (result === 'goal') return { steps, end: at, status: 'goal', crashAt: null };
+          if (result === 'crashed') return { steps, end: at, status: 'crashed', crashAt: [i, b] };
+        }
+      }
     }
   }
 

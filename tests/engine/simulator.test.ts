@@ -74,3 +74,75 @@ describe('run — basic movement', () => {
     expect(trace.end).toEqual({ x: 0, y: 2 });
   });
 });
+
+describe('run — repeat', () => {
+  // A 1-wide, 6-tall corridor. Robot at the bottom, goal at the top.
+  const corridor: Level = {
+    id: 'test-corridor',
+    world: 3,
+    width: 1,
+    height: 6,
+    start: { x: 0, y: 5 },
+    goal: { x: 0, y: 0 },
+    walls: [],
+    slots: 2,
+    arrows: ['up'],
+    repeatAllowed: true,
+    miniSlots: 0,
+    solution: [{ kind: 'repeat', times: 5, body: [{ kind: 'move', dir: 'up' }] }],
+  };
+
+  it('expands a repeat into one step per iteration', () => {
+    const trace = run(corridor, [
+      { kind: 'repeat', times: 5, body: [{ kind: 'move', dir: 'up' }] },
+    ]);
+    expect(trace.status).toBe('goal');
+    expect(trace.steps).toHaveLength(5);
+    expect(trace.end).toEqual({ x: 0, y: 0 });
+  });
+
+  it('paths repeat body steps as [tileIndex, bodyIndex]', () => {
+    const trace = run(corridor, [
+      { kind: 'repeat', times: 2, body: [{ kind: 'move', dir: 'up' }] },
+    ]);
+    expect(trace.steps.map((s) => s.path)).toEqual([[0, 0], [0, 0]]);
+  });
+
+  it('runs a multi-move body in order each iteration', () => {
+    const room: Level = {
+      ...corridor, width: 3, height: 3,
+      start: { x: 0, y: 2 }, goal: { x: 2, y: 0 }, arrows: ['up', 'right'],
+      solution: [{ kind: 'repeat', times: 2, body: [
+        { kind: 'move', dir: 'right' }, { kind: 'move', dir: 'up' },
+      ] }],
+    };
+    const trace = run(room, [{ kind: 'repeat', times: 2, body: [
+      { kind: 'move', dir: 'right' }, { kind: 'move', dir: 'up' },
+    ] }]);
+    expect(trace.status).toBe('goal');
+    expect(trace.steps.map((s) => s.path)).toEqual([[0, 0], [0, 1], [0, 0], [0, 1]]);
+    expect(trace.end).toEqual({ x: 2, y: 0 });
+  });
+
+  it('crashes mid-repeat and reports the body tile that failed', () => {
+    const trace = run(corridor, [
+      { kind: 'repeat', times: 9, body: [{ kind: 'move', dir: 'up' }] },
+    ]);
+    // Reaches the goal on the 5th iteration, so it never gets to crash.
+    expect(trace.status).toBe('goal');
+
+    const noGoal: Level = { ...corridor, goal: { x: 0, y: 99 } };
+    const crash = run(noGoal, [
+      { kind: 'repeat', times: 9, body: [{ kind: 'move', dir: 'up' }] },
+    ]);
+    expect(crash.status).toBe('crashed');
+    expect(crash.crashAt).toEqual([0, 0]);
+    expect(crash.end).toEqual({ x: 0, y: 0 });
+  });
+
+  it('treats a zero-times repeat as a no-op', () => {
+    const trace = run(corridor, [{ kind: 'repeat', times: 0, body: [{ kind: 'move', dir: 'up' }] }]);
+    expect(trace.steps).toEqual([]);
+    expect(trace.status).toBe('stopped');
+  });
+});
