@@ -146,10 +146,13 @@
 
 <section class="level">
   <header>
-    <button type="button" class="back" onclick={onback} aria-label="back to the levels">⬅️</button>
+    <button
+      type="button" class="back" disabled={running}
+      onclick={onback} aria-label="back to the levels"
+    >⬅️</button>
     {#if level.miniSlots > 0}
       <button
-        type="button" class="tab" class:on={editingMini}
+        type="button" class="tab" class:on={editingMini} disabled={running}
         onclick={() => (editingMini = !editingMini)}
         aria-label={editingMini ? 'edit the main program' : 'edit the mini program'}
       >🧩</button>
@@ -210,6 +213,8 @@
   }
 
   .tab.on { background: var(--accent-bg); border: 2px solid var(--accent); }
+
+  .back:disabled, .tab:disabled { opacity: 0.35; }
 
   .par {
     margin-left: auto;
