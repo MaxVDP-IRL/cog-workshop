@@ -91,4 +91,18 @@ describe('storage', () => {
     const loaded = loadProgress();
     expect(loaded.equipped).toEqual({ head: 'head-classic' });
   });
+
+  it('treats a non-plain-object equipped field as empty rather than misreading it', () => {
+    const withArray = { ...newProgress(), equipped: ['head-classic', 'body-bogus'] };
+    store.set('cog-workshop:progress', JSON.stringify(withArray));
+    expect(loadProgress().equipped).toEqual({});
+
+    const withNull = { ...newProgress(), equipped: null };
+    store.set('cog-workshop:progress', JSON.stringify(withNull));
+    expect(loadProgress().equipped).toEqual({});
+
+    const withString = { ...newProgress(), equipped: 'head-classic' };
+    store.set('cog-workshop:progress', JSON.stringify(withString));
+    expect(loadProgress().equipped).toEqual({});
+  });
 });

@@ -17,7 +17,7 @@ const sanitizePartIds = (ids: unknown): string[] =>
 
 /** Drops any slot whose equipped part id no longer exists in the current PARTS catalogue. */
 const sanitizeEquipped = (equipped: unknown): Partial<Record<Slot, string>> => {
-  if (!equipped || typeof equipped !== 'object') return {};
+  if (!equipped || typeof equipped !== 'object' || Array.isArray(equipped)) return {};
   const result: Partial<Record<Slot, string>> = {};
   for (const [slot, partId] of Object.entries(equipped as Record<string, unknown>)) {
     if (typeof partId === 'string' && validPartIds.has(partId)) {
