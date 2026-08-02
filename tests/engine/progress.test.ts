@@ -30,6 +30,11 @@ describe('isLevelUnlocked', () => {
     const after = completeLevel(newProgress(), LEVELS[0].id, 2).progress;
     expect(isLevelUnlocked(after, LEVELS[0].id)).toBe(true);
   });
+
+  it('keeps a level locked when an earlier-but-not-immediately-preceding level is complete', () => {
+    const after = completeLevel(newProgress(), LEVELS[0].id, 2).progress;
+    expect(isLevelUnlocked(after, LEVELS[2].id)).toBe(false);
+  });
 });
 
 describe('completeLevel', () => {
