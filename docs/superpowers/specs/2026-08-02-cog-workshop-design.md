@@ -103,6 +103,15 @@ learned without the word being used.
 Worlds 1 and 2 use **absolute direction arrows** — tapping ↑ moves the robot up
 the screen.
 
+**There is no turn instruction in worlds 1 and 2.** The arrow is the move:
+tapping ← moves the robot one cell toward the left of the screen regardless of
+which way it is currently pointing. Oskar never reasons about the robot's
+facing. The robot may swivel to face its direction of travel, but that is
+presentation only — no instruction and no puzzle depends on it.
+
+This matters because "turn left, then go forward" is two instructions plus a
+change of viewpoint, whereas "go left" is one instruction and none.
+
 Relative turning ("turn the robot's own left") requires taking the robot's
 point of view rather than the child's, which is the genuinely difficult step at
 age 5. It is therefore deferred to its own later world, introduced only once
