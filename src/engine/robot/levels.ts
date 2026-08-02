@@ -77,11 +77,16 @@ export const LEVELS: Level[] = [
   {
     id: 'w2-4', world: 2, width: 5, height: 5,
     start: { x: 0, y: 0 }, goal: { x: 4, y: 4 },
-    walls: [{ x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 3, y: 3 }],
+    // Two wall clusters, one guarding each naive corner path: {4,1}/{4,2}
+    // block "all the way right, then all the way down" and {1,4}/{2,4}
+    // block "all the way down, then all the way right". Only a route that
+    // turns mid-grid (e.g. via column x=3) gets through.
+    walls: [{ x: 4, y: 1 }, { x: 4, y: 2 }, { x: 1, y: 4 }, { x: 2, y: 4 }],
     slots: 10, arrows: ['up', 'down', 'left', 'right'], repeatAllowed: false, miniSlots: 0,
     solution: [
-      ...Array.from({ length: 4 }, () => ({ kind: 'move' as const, dir: 'right' as const })),
+      ...Array.from({ length: 3 }, () => ({ kind: 'move' as const, dir: 'right' as const })),
       ...Array.from({ length: 4 }, () => ({ kind: 'move' as const, dir: 'down' as const })),
+      { kind: 'move' as const, dir: 'right' as const },
     ],
   },
 
@@ -101,7 +106,13 @@ export const LEVELS: Level[] = [
   },
   {
     id: 'w3-3', world: 3, width: 5, height: 5,
-    start: { x: 0, y: 4 }, goal: { x: 4, y: 0 }, walls: [],
+    start: { x: 0, y: 4 }, goal: { x: 4, y: 0 },
+    // {2,2} sits on the diagonal midpoint of every balanced right/up
+    // interleaving (any body that alternates right and up hits it), so the
+    // single-tile zigzag from w3-4 cannot solve this level. The two-block
+    // route (all rights along row y=4, then all ups along column x=4) never
+    // passes through {2,2} and still fits in two repeat tiles.
+    walls: [{ x: 2, y: 2 }],
     slots: 3, arrows: ['up', 'right'], repeatAllowed: true, miniSlots: 0,
     solution: [
       { kind: 'repeat', times: 4, body: [{ kind: 'move', dir: 'right' }] },
