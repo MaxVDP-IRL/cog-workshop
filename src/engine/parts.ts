@@ -35,7 +35,7 @@ export const PARTS: Part[] = [
   { id: 'wheels-spring', slot: 'wheels', glyph: '🌀', label: 'springy wheels' },
   { id: 'antenna-rainbow', slot: 'antenna', glyph: '🌈', label: 'a rainbow aerial' },
   { id: 'body-drum', slot: 'body', glyph: '🥁', label: 'a drum body' },
-  { id: 'arms-rocket', slot: 'arms', glyph: '🎈', label: 'balloon arms' },
+  { id: 'arms-balloon', slot: 'arms', glyph: '🎈', label: 'balloon arms' },
 ];
 
 export const partById = (id: string): Part => {
