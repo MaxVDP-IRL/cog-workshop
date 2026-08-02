@@ -6,7 +6,8 @@
     "moduleResolution": "bundler",
     "types": ["node"],
     "noEmit": true,
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["vite.config.ts", "svelte.config.js"]
 }
