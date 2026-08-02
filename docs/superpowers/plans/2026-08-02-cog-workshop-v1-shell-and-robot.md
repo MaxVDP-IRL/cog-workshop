@@ -1891,11 +1891,10 @@ Shows the program as tiles. Tapping a tile removes it — the simplest edit a 5-
   const empties = $derived(Math.max(0, slots - program.length));
 </script>
 
-<div class="strip" role="list">
+<div class="strip" role="group">
   {#each program as tile, i (i)}
     <button
       type="button"
-      role="listitem"
       class="tile"
       class:active={activePath?.[0] === i}
       class:crashed={crashPath?.[0] === i}
@@ -1969,6 +1968,8 @@ Shows the program as tiles. Tapping a tile removes it — the simplest edit a 5-
 
 Only the arrows the level offers are shown, so world 1 presents exactly one button — the decision really is only "how many".
 
+The repeat button is disabled only by `running`, not by `full`: wrapping the last move already in the strip into a repeat (or bumping an existing repeat's count) replaces a tile in place rather than adding one, so it never needs a free slot the way the arrow keys and the mini button do — a full program should still let the player loop its last move.
+
 ```svelte
 <script lang="ts">
   import type { Direction } from '../../engine';
@@ -2015,7 +2016,7 @@ Only the arrows the level offers are shown, so world 1 presents exactly one butt
 
     {#if repeatAllowed}
       <button
-        type="button" class="key special" disabled={full || running}
+        type="button" class="key special" disabled={running}
         onclick={onrepeat} aria-label="add a repeat"
       >🔁</button>
     {/if}
