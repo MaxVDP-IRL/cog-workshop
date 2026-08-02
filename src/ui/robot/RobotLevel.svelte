@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import GridWorld from './GridWorld.svelte';
   import ProgramStrip from './ProgramStrip.svelte';
   import ArrowPad from './ArrowPad.svelte';
@@ -29,6 +30,15 @@
   let crashPath: number[] | null = $state(null);
   let running = $state(false);
   let solved = $state(false);
+
+  // play()'s tail (the post-goal speak/wait/onsolved sequence) is async and
+  // outlives this component if the child navigates away mid-animation —
+  // Svelte tearing down the component does not cancel in-flight promises or
+  // pending setTimeouts. Guard every resumption point so a torn-down
+  // instance's pending work becomes a no-op instead of mutating state or
+  // firing callbacks meant for whatever is mounted now.
+  let destroyed = false;
+  onDestroy(() => { destroyed = true; });
 
   const full = $derived(
     editingMini ? mini.length >= level.miniSlots : program.length >= level.slots,
@@ -118,14 +128,17 @@
     crashPath = null;
     robotAt = { ...level.start };
     await wait(120);
+    if (destroyed) return;
 
     const trace = run(level, program, mini);
 
     for (const step of trace.steps) {
+      if (destroyed) return;
       activePath = step.path;
       if (step.outcome === 'moved') robotAt = step.to;
       await wait(STEP_MS);
     }
+    if (destroyed) return;
 
     activePath = null;
     running = false;
@@ -134,6 +147,7 @@
       solved = true;
       speak('You did it!');
       await wait(900);
+      if (destroyed) return;
       onsolved(program.length);
     } else if (trace.status === 'crashed') {
       crashPath = trace.crashAt;
