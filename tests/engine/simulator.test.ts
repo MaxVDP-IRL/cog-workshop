@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { run } from '../../src/engine/robot/simulator';
-import type { Level } from '../../src/engine/robot/types';
+import type { Level, MoveInstruction } from '../../src/engine/robot/types';
 
 // A 3-wide, 3-tall open room. Robot bottom-left, goal bottom-right.
 const room: Level = {
@@ -144,5 +144,53 @@ describe('run — repeat', () => {
     const trace = run(corridor, [{ kind: 'repeat', times: 0, body: [{ kind: 'move', dir: 'up' }] }]);
     expect(trace.steps).toEqual([]);
     expect(trace.status).toBe('stopped');
+  });
+});
+
+describe('run — mini-programs', () => {
+  // A 4x4 room. Robot bottom-left, goal top-right, reached by three
+  // right-then-up staircases.
+  const stairs: Level = {
+    id: 'test-stairs',
+    world: 4,
+    width: 4,
+    height: 4,
+    start: { x: 0, y: 3 },
+    goal: { x: 3, y: 0 },
+    walls: [],
+    slots: 3,
+    arrows: ['up', 'right'],
+    repeatAllowed: false,
+    miniSlots: 2,
+    solution: [{ kind: 'mini' }, { kind: 'mini' }, { kind: 'mini' }],
+    solutionMini: [{ kind: 'move', dir: 'right' }, { kind: 'move', dir: 'up' }],
+  };
+
+  const mini: MoveInstruction[] = [
+    { kind: 'move', dir: 'right' },
+    { kind: 'move', dir: 'up' },
+  ];
+
+  it('runs the mini body each time the mini tile appears', () => {
+    const trace = run(stairs, [{ kind: 'mini' }, { kind: 'mini' }, { kind: 'mini' }], mini);
+    expect(trace.status).toBe('goal');
+    expect(trace.steps).toHaveLength(6);
+    expect(trace.end).toEqual({ x: 3, y: 0 });
+  });
+
+  it('paths mini body steps as [tileIndex, bodyIndex]', () => {
+    const trace = run(stairs, [{ kind: 'mini' }, { kind: 'mini' }], mini);
+    expect(trace.steps.map((s) => s.path)).toEqual([[0, 0], [0, 1], [1, 0], [1, 1]]);
+  });
+
+  it('treats an empty or absent mini body as a no-op', () => {
+    expect(run(stairs, [{ kind: 'mini' }], []).steps).toEqual([]);
+    expect(run(stairs, [{ kind: 'mini' }]).steps).toEqual([]);
+  });
+
+  it('crashes inside a mini and reports the body tile that failed', () => {
+    const trace = run(stairs, [{ kind: 'mini' }], [{ kind: 'move', dir: 'left' }]);
+    expect(trace.status).toBe('crashed');
+    expect(trace.crashAt).toEqual([0, 0]);
   });
 });

@@ -17,7 +17,11 @@ const blocked = (level: Level, cell: Cell): boolean =>
  * Executes a program against a level, returning a deterministic trace.
  * Execution halts on reaching the goal or on the first blocked move.
  */
-export const run = (level: Level, program: Instruction[]): Trace => {
+export const run = (
+  level: Level,
+  program: Instruction[],
+  mini: MoveInstruction[] = [],
+): Trace => {
   const steps: TraceStep[] = [];
   let at: Cell = { ...level.start };
 
@@ -49,6 +53,14 @@ export const run = (level: Level, program: Instruction[]): Trace => {
           if (result === 'goal') return { steps, end: at, status: 'goal', crashAt: null };
           if (result === 'crashed') return { steps, end: at, status: 'crashed', crashAt: [i, b] };
         }
+      }
+    }
+
+    if (instruction.kind === 'mini') {
+      for (let b = 0; b < mini.length; b++) {
+        const result = applyMove(mini[b], [i, b]);
+        if (result === 'goal') return { steps, end: at, status: 'goal', crashAt: null };
+        if (result === 'crashed') return { steps, end: at, status: 'crashed', crashAt: [i, b] };
       }
     }
   }
