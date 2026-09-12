@@ -2,10 +2,12 @@
   let {
     partCount,
     onrobot,
+    onlightbulb,
     ongarage,
   }: {
     partCount: number;
     onrobot: () => void;
+    onlightbulb: () => void;
     ongarage: () => void;
   } = $props();
 </script>
@@ -18,9 +20,8 @@
       <span class="glyph">🤖</span>
     </button>
 
-    <button type="button" class="bench locked" disabled aria-label="lightbulb machine, locked">
+    <button type="button" class="bench" onclick={onlightbulb} aria-label="lightbulb machine">
       <span class="glyph">💡</span>
-      <span class="lock" aria-hidden="true">🔒</span>
     </button>
 
     <button type="button" class="bench locked" disabled aria-label="marble machine, locked">
