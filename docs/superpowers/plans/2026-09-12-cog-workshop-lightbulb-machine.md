@@ -298,8 +298,10 @@ export const LEVELS: Level[] = [
 
   // ---------------------------------------------------------------- Stage 2
   // Three switches (up to 7). Climbing bit-count: 1, 2, then all three.
+  // target 5 (not 6) pairs switch 1 with the newest switch, matching how
+  // lb3-2 and lb4-2 each pair switch 1 with their own newest switch.
   { id: 'lb2-1', stage: 2, switches: [1, 2, 4], target: 4 },
-  { id: 'lb2-2', stage: 2, switches: [1, 2, 4], target: 6 },
+  { id: 'lb2-2', stage: 2, switches: [1, 2, 4], target: 5 },
   { id: 'lb2-3', stage: 2, switches: [1, 2, 4], target: 7 },
 
   // ---------------------------------------------------------------- Stage 3
