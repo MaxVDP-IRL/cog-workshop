@@ -21,7 +21,7 @@
 **Design decisions made for this plan that the spec doesn't spell out** (the spec describes the game conceptually; these are the implementation calls this plan makes):
 
 1. **Switch state is a single integer bitmask.** Switch values (1, 2, 4, 8, 16) are non-overlapping powers of two, so "which switches are lit" and "their sum" are the exact same number. A level's target is just an integer 0–31; the machine is solved the instant the lit bitmask equals the target. There is no separate "run" step like the robot game has — flipping a switch has an immediate, live effect, and matching triggers success automatically. This is a deliberate difference from the robot game's build-then-run flow, not an oversight.
-2. **"Tidy" (the bonus-part condition) means reaching the target in the fewest possible taps** — i.e. total switch-flip actions since the level loaded or was last cleared, not "how many switches ended up on" (that number is *always* fixed at `popcount(target)` for any winning state, since winning requires exactly matching the target — so it can't be used to measure efficiency). `par(level)` is `popcount(level.target)`; a solve is tidy when `tapsUsed <= par(level)`, mirroring the robot game's `tilesUsed <= par(level)` check exactly.
+2. **"Tidy" (the bonus-part condition) means reaching the target in the fewest possible taps** — i.e. total switch-flip actions since the level loaded or was last cleared, not "how many switches ended up on" (that number is *always* fixed at `litCount(target)` for any winning state, since winning requires exactly matching the target — so it can't be used to measure efficiency). `par(level)` is `litCount(level.target)`; a solve is tidy when `tapsUsed <= par(level)`, mirroring the robot game's `tilesUsed <= par(level)` check exactly.
 3. **14 levels across 4 stages** (targets 1–3 with 2 switches, then introducing one more switch per stage up to all 5), not one level per integer 1–31 — matching the robot game's "roughly 4 levels per stage" density rather than exhaustively covering every target.
 4. **Count-up mode is a separate bonus screen**, unlocked once all 14 real levels are completed, reachable from the Lightbulb bench. It has no win condition, no progress tracking of its own — it's a toy for watching the counting pattern, exactly as the spec describes ("revealing the pattern by which the machine counts").
 5. **The shared parts catalogue is expanded by 20 parts** (4 per slot), because awards now come from two games (15 robot levels + 14 lightbulb levels, each with a possible tidy bonus) drawing from the same pool.
@@ -39,7 +39,7 @@ src/
 │   ├── parts.ts                          MODIFY — append 20 new parts
 │   └── lightbulb/
 │       ├── types.ts                      SwitchValue, SWITCH_VALUES, Level
-│       ├── machine.ts                    toggle/isOn/popcount/nextCount/MAX_LIT — pure, tested
+│       ├── machine.ts                    toggle/isOn/litCount/nextCount/MAX_LIT — pure, tested
 │       └── levels.ts                     the 14 levels + levelById/firstLevelId/nextLevelId/par
 ├── platform/
 │   └── storage.ts                        MODIFY — generalize id-sanitizing, cover new fields
@@ -77,7 +77,7 @@ tests/engine/
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { toggle, isOn, popcount, nextCount, MAX_LIT } from '../../src/engine/lightbulb/machine';
+import { toggle, isOn, litCount, nextCount, MAX_LIT } from '../../src/engine/lightbulb/machine';
 
 describe('toggle', () => {
   it('turns a switch on from off', () => {
@@ -105,16 +105,16 @@ describe('isOn', () => {
   });
 });
 
-describe('popcount', () => {
+describe('litCount', () => {
   it('counts zero for nothing lit', () => {
-    expect(popcount(0)).toBe(0);
+    expect(litCount(0)).toBe(0);
   });
 
   it('counts each lit bit once', () => {
-    expect(popcount(1)).toBe(1);
-    expect(popcount(3)).toBe(2);
-    expect(popcount(7)).toBe(3);
-    expect(popcount(31)).toBe(5);
+    expect(litCount(1)).toBe(1);
+    expect(litCount(3)).toBe(2);
+    expect(litCount(7)).toBe(3);
+    expect(litCount(31)).toBe(5);
   });
 });
 
@@ -173,7 +173,7 @@ export const toggle = (lit: number, sw: SwitchValue): number => lit ^ sw;
 export const isOn = (lit: number, sw: SwitchValue): boolean => (lit & sw) !== 0;
 
 /** How many switches are lit — the fewest possible taps to reach this state from off. */
-export const popcount = (n: number): number =>
+export const litCount = (n: number): number =>
   n.toString(2).split('').filter((bit) => bit === '1').length;
 
 /** The bitmask with every switch in the app turned on (all five: 1+2+4+8+16). */
@@ -213,7 +213,7 @@ Every target is representable by construction (any integer fits in 5 binary digi
 import { describe, it, expect } from 'vitest';
 import { LEVELS, levelById, firstLevelId, nextLevelId, par } from '../../src/engine/lightbulb/levels';
 import { SWITCH_VALUES } from '../../src/engine/lightbulb/types';
-import { popcount } from '../../src/engine/lightbulb/machine';
+import { litCount } from '../../src/engine/lightbulb/machine';
 
 describe('lightbulb level content', () => {
   it('has unique ids', () => {
@@ -253,9 +253,9 @@ describe('lightbulb level content', () => {
     }
   });
 
-  it('derives par from the target popcount', () => {
+  it('derives par from the target litCount', () => {
     for (const level of LEVELS) {
-      expect(par(level)).toBe(popcount(level.target));
+      expect(par(level)).toBe(litCount(level.target));
     }
   });
 
@@ -286,7 +286,7 @@ Expected: FAIL — cannot resolve `../../src/engine/lightbulb/levels`.
 Coordinate the difficulty: within each stage, targets climb through a spread of bit-counts (1 bit is easiest — a single switch — up to using every switch in the stage). Stage 4's final level (target 31) uses every switch there is, deliberately closing out the game the same way world 4 closes the robot game.
 
 ```ts
-import { popcount } from './machine';
+import { litCount } from './machine';
 import type { Level } from './types';
 
 export const LEVELS: Level[] = [
@@ -331,7 +331,7 @@ export const nextLevelId = (id: string): string | null => {
 };
 
 /** Fewest taps that can reach the target from off — the tidy-bonus threshold. */
-export const par = (level: Level): number => popcount(level.target);
+export const par = (level: Level): number => litCount(level.target);
 ```
 
 - [ ] **Step 4: Run the test to verify it passes**
@@ -529,7 +529,7 @@ describe('isLightbulbLevelUnlocked', () => {
 
 describe('completeLightbulbLevel', () => {
   it('records the level and awards one part', () => {
-    // lb1-1's target is 1, so par is 1 (popcount(1) === 1).
+    // lb1-1's target is 1, so par is 1 (litCount(1) === 1).
     const { progress, earned } = completeLightbulbLevel(newProgress(), LIGHTBULB_LEVELS[0].id, 2);
     expect(progress.lightbulbCompletedLevels).toEqual([LIGHTBULB_LEVELS[0].id]);
     expect(earned).toHaveLength(1);
@@ -765,7 +765,7 @@ export type {
   RepeatInstruction, StepOutcome, Trace, TraceStep,
 } from './robot/types';
 
-export { toggle, isOn, popcount, nextCount, MAX_LIT } from './lightbulb/machine';
+export { toggle, isOn, litCount, nextCount, MAX_LIT } from './lightbulb/machine';
 export { SWITCH_VALUES } from './lightbulb/types';
 export type { SwitchValue, Level as LightbulbLevel } from './lightbulb/types';
 export {
@@ -1105,7 +1105,7 @@ This is the heart of the game, mirroring `RobotLevel.svelte`'s role. Unlike the 
 ```svelte
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { toggle, isOn, popcount, type LightbulbLevel, type SwitchValue } from '../../engine';
+  import { toggle, isOn, litCount, type LightbulbLevel, type SwitchValue } from '../../engine';
   import { speak } from '../../platform/speech';
 
   let {
@@ -1173,7 +1173,7 @@ This is the heart of the game, mirroring `RobotLevel.svelte`'s role. Unlike the 
       type="button" class="back" disabled={running}
       onclick={onback} aria-label="back to the levels"
     >⬅️</button>
-    <span class="par" aria-hidden="true">⭐ {popcount(level.target)}</span>
+    <span class="par" aria-hidden="true">⭐ {litCount(level.target)}</span>
   </header>
 
   <div class="target" class:solved aria-label="target number {level.target}">
@@ -1859,4 +1859,4 @@ Record what you observe in the repo — it's the input for tuning stages 2–4 a
 
 **Placeholder scan:** no TBDs, no "add error handling," no references to undefined functions. Every code step carries complete code.
 
-**Type consistency:** `Level` (lightbulb) is exported as `LightbulbLevel` from the barrel in Task 5 and imported that way everywhere it's used (Tasks 8, 11) — never as the bare `Level`, which stays the robot type. `completeLightbulbLevel`'s return shape (`{ progress, earned }`) matches `completeLevel`'s exactly, and `App.svelte` destructures both the same way. `isLightbulbLevelUnlocked`/`lightbulbLevelById`/`lightbulbNextLevelId`/`lightbulbPar` names are used consistently from their definition in Tasks 4–5 through their consumption in Tasks 7, 8, 11. `SwitchValue`/`SWITCH_VALUES`/`toggle`/`isOn`/`popcount`/`nextCount`/`MAX_LIT` are defined once in Task 1 and used with those exact names in Tasks 2, 4, 8, 9.
+**Type consistency:** `Level` (lightbulb) is exported as `LightbulbLevel` from the barrel in Task 5 and imported that way everywhere it's used (Tasks 8, 11) — never as the bare `Level`, which stays the robot type. `completeLightbulbLevel`'s return shape (`{ progress, earned }`) matches `completeLevel`'s exactly, and `App.svelte` destructures both the same way. `isLightbulbLevelUnlocked`/`lightbulbLevelById`/`lightbulbNextLevelId`/`lightbulbPar` names are used consistently from their definition in Tasks 4–5 through their consumption in Tasks 7, 8, 11. `SwitchValue`/`SWITCH_VALUES`/`toggle`/`isOn`/`litCount`/`nextCount`/`MAX_LIT` are defined once in Task 1 and used with those exact names in Tasks 2, 4, 8, 9.
