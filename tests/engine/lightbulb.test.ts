@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toggle, isOn, popcount, nextCount, MAX_LIT } from '../../src/engine/lightbulb/machine';
+import { toggle, isOn, litCount, nextCount, MAX_LIT } from '../../src/engine/lightbulb/machine';
 
 describe('toggle', () => {
   it('turns a switch on from off', () => {
@@ -27,16 +27,16 @@ describe('isOn', () => {
   });
 });
 
-describe('popcount', () => {
+describe('litCount', () => {
   it('counts zero for nothing lit', () => {
-    expect(popcount(0)).toBe(0);
+    expect(litCount(0)).toBe(0);
   });
 
   it('counts each lit bit once', () => {
-    expect(popcount(1)).toBe(1);
-    expect(popcount(3)).toBe(2);
-    expect(popcount(7)).toBe(3);
-    expect(popcount(31)).toBe(5);
+    expect(litCount(1)).toBe(1);
+    expect(litCount(3)).toBe(2);
+    expect(litCount(7)).toBe(3);
+    expect(litCount(31)).toBe(5);
   });
 });
 
