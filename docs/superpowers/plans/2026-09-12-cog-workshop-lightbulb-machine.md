@@ -893,6 +893,17 @@ const validPartIds = new Set(PARTS.map((p) => p.id));
 /** Keeps only ids present in the given valid-id set. */
 const sanitizeIds = (ids: unknown, valid: Set<string>): string[] =>
   Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string' && valid.has(id)) : [];
+
+/**
+ * Thin, named wrappers around sanitizeIds, one per field. A bare
+ * sanitizeIds(ids, validSet) call site can silently pass the wrong Set —
+ * validLevelIds and validLightbulbLevelIds are both plain Set<string>, so
+ * TypeScript can't catch the mix-up. These wrappers turn that mistake into
+ * an obvious wrong-function-name typo instead.
+ */
+const sanitizeRobotLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validLevelIds);
+const sanitizeLightbulbLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validLightbulbLevelIds);
+const sanitizePartIds = (ids: unknown): string[] => sanitizeIds(ids, validPartIds);
 ```
 
 Update every call site inside `loadProgress` from:
@@ -914,14 +925,16 @@ to:
     return {
       ...newProgress(),
       ...parsed,
-      completedLevels: sanitizeIds(parsed.completedLevels, validLevelIds),
-      tidyLevels: sanitizeIds(parsed.tidyLevels, validLevelIds),
-      lightbulbCompletedLevels: sanitizeIds(parsed.lightbulbCompletedLevels, validLightbulbLevelIds),
-      lightbulbTidyLevels: sanitizeIds(parsed.lightbulbTidyLevels, validLightbulbLevelIds),
-      parts: sanitizeIds(parsed.parts, validPartIds),
+      completedLevels: sanitizeRobotLevelIds(parsed.completedLevels),
+      tidyLevels: sanitizeRobotLevelIds(parsed.tidyLevels),
+      lightbulbCompletedLevels: sanitizeLightbulbLevelIds(parsed.lightbulbCompletedLevels),
+      lightbulbTidyLevels: sanitizeLightbulbLevelIds(parsed.lightbulbTidyLevels),
+      parts: sanitizePartIds(parsed.parts),
       equipped: sanitizeEquipped(parsed.equipped),
     };
 ```
+
+`loadProgress` never calls `sanitizeIds` directly with a raw `Set` argument — only through one of the three named wrappers above.
 
 `sanitizeEquipped` (the object-shaped sanitizer, distinct from the array-shaped ones) stays exactly as it is — it already only checks part ids, which is unaffected by this change.
 
