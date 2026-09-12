@@ -526,6 +526,8 @@ describe('isLightbulbLevelUnlocked', () => {
 
     const afterLightbulb = completeLightbulbLevel(newProgress(), LIGHTBULB_LEVELS[0].id, 1).progress;
     expect(isLevelUnlocked(afterLightbulb, 'w1-2')).toBe(false);
+    expect(afterLightbulb.completedLevels).toEqual([]);
+    expect(afterLightbulb.tidyLevels).toEqual([]);
   });
 });
 
@@ -569,6 +571,12 @@ describe('completeLightbulbLevel', () => {
     completeLightbulbLevel(p, LIGHTBULB_LEVELS[0].id, 1);
     expect(p.lightbulbCompletedLevels).toEqual([]);
     expect(p.parts).toEqual([]);
+  });
+
+  it('stops awarding once every part is owned', () => {
+    const p = { ...newProgress(), parts: PARTS.map((x) => x.id) };
+    const { earned } = completeLightbulbLevel(p, LIGHTBULB_LEVELS[0].id, 1);
+    expect(earned).toEqual([]);
   });
 
   it('shares one parts pool with robot-level completions', () => {
