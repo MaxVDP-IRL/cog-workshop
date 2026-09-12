@@ -16,7 +16,8 @@ describe('parts catalogue', () => {
   });
 
   it('has at least as many parts as there are levels to earn them', () => {
-    expect(PARTS.length).toBeGreaterThanOrEqual(15);
+    // 15 robot levels + 14 lightbulb levels, each capable of a tidy bonus.
+    expect(PARTS.length).toBeGreaterThanOrEqual(29);
   });
 
   it('looks a part up by id', () => {
