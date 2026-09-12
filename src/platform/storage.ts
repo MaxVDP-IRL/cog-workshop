@@ -12,6 +12,15 @@ const validPartIds = new Set(PARTS.map((p) => p.id));
 const sanitizeIds = (ids: unknown, valid: Set<string>): string[] =>
   Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string' && valid.has(id)) : [];
 
+/** Keeps only ids that exist in the current robot LEVELS catalogue. */
+const sanitizeRobotLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validLevelIds);
+
+/** Keeps only ids that exist in the current lightbulb LEVELS catalogue. */
+const sanitizeLightbulbLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validLightbulbLevelIds);
+
+/** Keeps only ids that exist in the current PARTS catalogue. */
+const sanitizePartIds = (ids: unknown): string[] => sanitizeIds(ids, validPartIds);
+
 /** Drops any slot whose equipped part id no longer exists in the current PARTS catalogue. */
 const sanitizeEquipped = (equipped: unknown): Partial<Record<Slot, string>> => {
   if (!equipped || typeof equipped !== 'object' || Array.isArray(equipped)) return {};
@@ -35,11 +44,11 @@ export const loadProgress = (): LoadedProgress => {
     return {
       ...newProgress(),
       ...parsed,
-      completedLevels: sanitizeIds(parsed.completedLevels, validLevelIds),
-      tidyLevels: sanitizeIds(parsed.tidyLevels, validLevelIds),
-      lightbulbCompletedLevels: sanitizeIds(parsed.lightbulbCompletedLevels, validLightbulbLevelIds),
-      lightbulbTidyLevels: sanitizeIds(parsed.lightbulbTidyLevels, validLightbulbLevelIds),
-      parts: sanitizeIds(parsed.parts, validPartIds),
+      completedLevels: sanitizeRobotLevelIds(parsed.completedLevels),
+      tidyLevels: sanitizeRobotLevelIds(parsed.tidyLevels),
+      lightbulbCompletedLevels: sanitizeLightbulbLevelIds(parsed.lightbulbCompletedLevels),
+      lightbulbTidyLevels: sanitizeLightbulbLevelIds(parsed.lightbulbTidyLevels),
+      parts: sanitizePartIds(parsed.parts),
       equipped: sanitizeEquipped(parsed.equipped),
     };
   } catch {
