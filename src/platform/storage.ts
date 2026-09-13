@@ -1,19 +1,25 @@
-import { newProgress, LEVELS, PARTS, type ProgressState, type Slot } from '../engine';
+import { newProgress, LEVELS, LIGHTBULB_LEVELS, PARTS, type ProgressState, type Slot } from '../engine';
 
 const KEY = 'cog-workshop:progress';
 
 export type LoadedProgress = ProgressState & { storageWarning?: boolean };
 
 const validLevelIds = new Set(LEVELS.map((l) => l.id));
+const validLightbulbLevelIds = new Set(LIGHTBULB_LEVELS.map((l) => l.id));
 const validPartIds = new Set(PARTS.map((p) => p.id));
 
-/** Keeps only level ids that exist in the current LEVELS catalogue. */
-const sanitizeLevelIds = (ids: unknown): string[] =>
-  Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string' && validLevelIds.has(id)) : [];
+/** Keeps only ids present in the given valid-id set. */
+const sanitizeIds = (ids: unknown, valid: Set<string>): string[] =>
+  Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string' && valid.has(id)) : [];
 
-/** Keeps only part ids that exist in the current PARTS catalogue. */
-const sanitizePartIds = (ids: unknown): string[] =>
-  Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string' && validPartIds.has(id)) : [];
+/** Keeps only ids that exist in the current robot LEVELS catalogue. */
+const sanitizeRobotLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validLevelIds);
+
+/** Keeps only ids that exist in the current lightbulb LEVELS catalogue. */
+const sanitizeLightbulbLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validLightbulbLevelIds);
+
+/** Keeps only ids that exist in the current PARTS catalogue. */
+const sanitizePartIds = (ids: unknown): string[] => sanitizeIds(ids, validPartIds);
 
 /** Drops any slot whose equipped part id no longer exists in the current PARTS catalogue. */
 const sanitizeEquipped = (equipped: unknown): Partial<Record<Slot, string>> => {
@@ -38,8 +44,10 @@ export const loadProgress = (): LoadedProgress => {
     return {
       ...newProgress(),
       ...parsed,
-      completedLevels: sanitizeLevelIds(parsed.completedLevels),
-      tidyLevels: sanitizeLevelIds(parsed.tidyLevels),
+      completedLevels: sanitizeRobotLevelIds(parsed.completedLevels),
+      tidyLevels: sanitizeRobotLevelIds(parsed.tidyLevels),
+      lightbulbCompletedLevels: sanitizeLightbulbLevelIds(parsed.lightbulbCompletedLevels),
+      lightbulbTidyLevels: sanitizeLightbulbLevelIds(parsed.lightbulbTidyLevels),
       parts: sanitizePartIds(parsed.parts),
       equipped: sanitizeEquipped(parsed.equipped),
     };

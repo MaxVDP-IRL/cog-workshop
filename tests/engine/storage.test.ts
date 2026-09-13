@@ -105,4 +105,45 @@ describe('storage', () => {
     store.set('cog-workshop:progress', JSON.stringify(withString));
     expect(loadProgress().equipped).toEqual({});
   });
+
+  it('drops unknown lightbulb level ids while keeping valid ones', () => {
+    store.set('cog-workshop:progress', JSON.stringify({
+      version: 1,
+      completedLevels: [],
+      tidyLevels: [],
+      lightbulbCompletedLevels: ['lb1-1', 'no-such-lightbulb-level'],
+      lightbulbTidyLevels: ['lb1-1', 'no-such-lightbulb-level'],
+      parts: [],
+      equipped: {},
+    }));
+    const loaded = loadProgress();
+    expect(loaded.lightbulbCompletedLevels).toEqual(['lb1-1']);
+    expect(loaded.lightbulbTidyLevels).toEqual(['lb1-1']);
+  });
+
+  it('drops a valid robot id found in a lightbulb field, and vice versa', () => {
+    store.set('cog-workshop:progress', JSON.stringify({
+      version: 1,
+      completedLevels: ['lb1-1'],
+      tidyLevels: [],
+      lightbulbCompletedLevels: ['w1-1'],
+      lightbulbTidyLevels: [],
+      parts: [],
+      equipped: {},
+    }));
+    const loaded = loadProgress();
+    // 'lb1-1' is a real lightbulb id, not a robot one — must be dropped from completedLevels.
+    expect(loaded.completedLevels).toEqual([]);
+    // 'w1-1' is a real robot id, not a lightbulb one — must be dropped from lightbulbCompletedLevels.
+    expect(loaded.lightbulbCompletedLevels).toEqual([]);
+  });
+
+  it('backfills lightbulb fields missing from an older save', () => {
+    store.set('cog-workshop:progress', JSON.stringify({
+      version: 1, completedLevels: [], tidyLevels: [], parts: [], equipped: {},
+    }));
+    const loaded = loadProgress();
+    expect(loaded.lightbulbCompletedLevels).toEqual([]);
+    expect(loaded.lightbulbTidyLevels).toEqual([]);
+  });
 });

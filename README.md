@@ -10,8 +10,9 @@ that one teaches number sense, this one teaches computing.
 
 ## Status
 
-🤖 **v1 live** — the shared shell and Teach the Robot (15 levels, four worlds).
-Lightbulb Machine and Marble Machine are next, each with its own plan.
+🤖💡 **v1 live** — the shared shell, Teach the Robot (15 levels, four worlds),
+and the Lightbulb Machine (14 levels, four stages, plus a counting-pattern
+bonus mode). Marble Machine is next, with its own plan.
 
 **Play:** https://maxvdp-irl.github.io/cog-workshop/
 

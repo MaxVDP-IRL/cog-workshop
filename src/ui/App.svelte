@@ -3,14 +3,21 @@
   import Garage from './Garage.svelte';
   import RobotBench from './robot/RobotBench.svelte';
   import RobotLevel from './robot/RobotLevel.svelte';
+  import LightbulbBench from './lightbulb/LightbulbBench.svelte';
+  import LightbulbMachine from './lightbulb/LightbulbMachine.svelte';
+  import LightbulbCountUp from './lightbulb/LightbulbCountUp.svelte';
   import { loadProgress, saveProgress, type LoadedProgress } from '../platform/storage';
   import { speak } from '../platform/speech';
   import {
-    completeLevel, equippedOrDefault, levelById, nextLevelId, partById,
+    completeLevel, completeLightbulbLevel, equippedOrDefault, levelById, lightbulbLevelById,
+    nextLevelId, lightbulbNextLevelId, partById,
     type ProgressState, type Slot,
   } from '../engine';
 
-  type Screen = 'home' | 'bench' | 'level' | 'garage';
+  type Screen =
+    | 'home' | 'garage'
+    | 'robot-bench' | 'robot-level'
+    | 'lightbulb-bench' | 'lightbulb-level' | 'lightbulb-countup';
 
   let progress: LoadedProgress = $state(loadProgress());
   let screen: Screen = $state('home');
@@ -27,33 +34,54 @@
     return head ? partById(head).glyph : '🤖';
   });
 
-  const openLevel = (id: string) => {
+  const openRobotLevel = (id: string) => {
     currentLevelId = id;
-    screen = 'level';
+    screen = 'robot-level';
   };
 
-  const solved = (tilesUsed: number) => {
+  const openLightbulbLevel = (id: string) => {
+    currentLevelId = id;
+    screen = 'lightbulb-level';
+  };
+
+  /** Shows the award pop-up if anything was earned. Returns whether it did. */
+  const award = (earned: string[]): boolean => {
+    if (earned.length === 0) return false;
+    awarded = earned;
+    speak(`You earned ${earned.map((id) => partById(id).label).join(' and ')}`);
+    return true;
+  };
+
+  const robotSolved = (tilesUsed: number) => {
     if (!currentLevelId) return;
     const { progress: next, earned } = completeLevel(progress, currentLevelId, tilesUsed);
     update(next);
-
-    if (earned.length > 0) {
-      awarded = earned;
-      speak(`You earned ${earned.map((id) => partById(id).label).join(' and ')}`);
-    } else {
-      goToNextLevel();
-    }
+    if (!award(earned)) goToNextRobotLevel();
   };
 
-  const goToNextLevel = () => {
+  const goToNextRobotLevel = () => {
     const next = currentLevelId ? nextLevelId(currentLevelId) : null;
     if (next) currentLevelId = next;
-    else screen = 'bench';
+    else screen = 'robot-bench';
+  };
+
+  const lightbulbSolved = (tapsUsed: number) => {
+    if (!currentLevelId) return;
+    const { progress: next, earned } = completeLightbulbLevel(progress, currentLevelId, tapsUsed);
+    update(next);
+    if (!award(earned)) goToNextLightbulbLevel();
+  };
+
+  const goToNextLightbulbLevel = () => {
+    const next = currentLevelId ? lightbulbNextLevelId(currentLevelId) : null;
+    if (next) currentLevelId = next;
+    else screen = 'lightbulb-bench';
   };
 
   const dismissAward = () => {
     awarded = [];
-    goToNextLevel();
+    if (screen === 'robot-level') goToNextRobotLevel();
+    else if (screen === 'lightbulb-level') goToNextLightbulbLevel();
   };
 
   const equip = (slot: Slot, partId: string) => {
@@ -64,18 +92,34 @@
 {#if screen === 'home'}
   <Home
     partCount={progress.parts.length}
-    onrobot={() => (screen = 'bench')}
+    onrobot={() => (screen = 'robot-bench')}
+    onlightbulb={() => (screen = 'lightbulb-bench')}
     ongarage={() => (screen = 'garage')}
   />
-{:else if screen === 'bench'}
-  <RobotBench {progress} onplay={openLevel} onback={() => (screen = 'home')} />
-{:else if screen === 'level' && currentLevelId}
+{:else if screen === 'robot-bench'}
+  <RobotBench {progress} onplay={openRobotLevel} onback={() => (screen = 'home')} />
+{:else if screen === 'robot-level' && currentLevelId}
   <RobotLevel
     level={levelById(currentLevelId)}
     glyph={robotGlyph}
-    onsolved={solved}
-    onback={() => (screen = 'bench')}
+    onsolved={robotSolved}
+    onback={() => (screen = 'robot-bench')}
   />
+{:else if screen === 'lightbulb-bench'}
+  <LightbulbBench
+    {progress}
+    onplay={openLightbulbLevel}
+    oncountup={() => (screen = 'lightbulb-countup')}
+    onback={() => (screen = 'home')}
+  />
+{:else if screen === 'lightbulb-level' && currentLevelId}
+  <LightbulbMachine
+    level={lightbulbLevelById(currentLevelId)}
+    onsolved={lightbulbSolved}
+    onback={() => (screen = 'lightbulb-bench')}
+  />
+{:else if screen === 'lightbulb-countup'}
+  <LightbulbCountUp onback={() => (screen = 'lightbulb-bench')} />
 {:else if screen === 'garage'}
   <Garage {progress} onequip={equip} onback={() => (screen = 'home')} />
 {/if}
