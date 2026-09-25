@@ -99,10 +99,11 @@ const board: Level = {
 describe('run — falling straight', () => {
   it('falls straight down with no pieces placed', () => {
     const trace = run(board, []);
-    expect(trace.ticks).toHaveLength(3);
+    expect(trace.ticks).toHaveLength(4);
     expect(trace.ticks[0]).toEqual({ marbles: [{ x: 1, y: 0 }] });
     expect(trace.ticks[1]).toEqual({ marbles: [{ x: 1, y: 1 }] });
     expect(trace.ticks[2]).toEqual({ marbles: [{ x: 1, y: 2 }] });
+    expect(trace.ticks[3]).toEqual({ marbles: [] });
   });
 
   it('catches a marble that lands on a bucket', () => {
