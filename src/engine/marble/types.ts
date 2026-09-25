@@ -1,4 +1,12 @@
-export type MarblePieceKind = 'ramp-left' | 'ramp-right' | 'splitter' | 'bucket';
+export type MarblePieceKind =
+  /** Shifts a marble passing through one column left as it falls, in one tick. */
+  | 'ramp-left'
+  /** Shifts a marble passing through one column right as it falls, in one tick. */
+  | 'ramp-right'
+  /** Replaces a marble passing through with two, one falling down-left and one down-right, in one tick. */
+  | 'splitter'
+  /** Catches any marble that lands here; it stops falling and is counted, in one tick. */
+  | 'bucket';
 
 export interface Cell {
   x: number; // column, 0 at the left, increasing rightwards

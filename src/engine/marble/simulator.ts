@@ -2,6 +2,10 @@ import type { Cell, Level, MarblePiece, MarblePieceKind, Trace, TickState } from
 
 const key = (c: Cell): string => `${c.x},${c.y}`;
 
+/** Whether a cell is still within the level's grid (a marble past this is dropped). */
+const inBounds = (c: Cell, level: Level): boolean =>
+  c.x >= 0 && c.x < level.width && c.y < level.height;
+
 /**
  * Runs one marble (and whatever it clones into) through a placed board,
  * returning every tick's marble positions and how many marbles each bucket
@@ -27,15 +31,16 @@ export const run = (level: Level, pieces: MarblePiece[]): Trace => {
         continue;
       }
       if (kind === 'splitter') {
-        next.push({ x: m.x - 1, y: m.y + 1 });
-        next.push({ x: m.x + 1, y: m.y + 1 });
+        const left: Cell = { x: m.x - 1, y: m.y + 1 };
+        const right: Cell = { x: m.x + 1, y: m.y + 1 };
+        if (inBounds(left, level)) next.push(left);
+        if (inBounds(right, level)) next.push(right);
         continue;
       }
 
       const dx = kind === 'ramp-left' ? -1 : kind === 'ramp-right' ? 1 : 0;
       const to: Cell = { x: m.x + dx, y: m.y + 1 };
-      if (to.x < 0 || to.x >= level.width || to.y >= level.height) continue;
-      next.push(to);
+      if (inBounds(to, level)) next.push(to);
     }
     marbles = next;
     ticks.push({ marbles: marbles.map((m) => ({ ...m })) });
