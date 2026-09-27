@@ -1,4 +1,4 @@
-import { newProgress, LEVELS, LIGHTBULB_LEVELS, PARTS, type ProgressState, type Slot } from '../engine';
+import { newProgress, LEVELS, LIGHTBULB_LEVELS, MARBLE_LEVELS, PARTS, type ProgressState, type Slot } from '../engine';
 
 const KEY = 'cog-workshop:progress';
 
@@ -6,6 +6,7 @@ export type LoadedProgress = ProgressState & { storageWarning?: boolean };
 
 const validLevelIds = new Set(LEVELS.map((l) => l.id));
 const validLightbulbLevelIds = new Set(LIGHTBULB_LEVELS.map((l) => l.id));
+const validMarbleLevelIds = new Set(MARBLE_LEVELS.map((l) => l.id));
 const validPartIds = new Set(PARTS.map((p) => p.id));
 
 /** Keeps only ids present in the given valid-id set. */
@@ -17,6 +18,9 @@ const sanitizeRobotLevelIds = (ids: unknown): string[] => sanitizeIds(ids, valid
 
 /** Keeps only ids that exist in the current lightbulb LEVELS catalogue. */
 const sanitizeLightbulbLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validLightbulbLevelIds);
+
+/** Keeps only ids that exist in the current marble LEVELS catalogue. */
+const sanitizeMarbleLevelIds = (ids: unknown): string[] => sanitizeIds(ids, validMarbleLevelIds);
 
 /** Keeps only ids that exist in the current PARTS catalogue. */
 const sanitizePartIds = (ids: unknown): string[] => sanitizeIds(ids, validPartIds);
@@ -48,6 +52,8 @@ export const loadProgress = (): LoadedProgress => {
       tidyLevels: sanitizeRobotLevelIds(parsed.tidyLevels),
       lightbulbCompletedLevels: sanitizeLightbulbLevelIds(parsed.lightbulbCompletedLevels),
       lightbulbTidyLevels: sanitizeLightbulbLevelIds(parsed.lightbulbTidyLevels),
+      marbleCompletedLevels: sanitizeMarbleLevelIds(parsed.marbleCompletedLevels),
+      marbleTidyLevels: sanitizeMarbleLevelIds(parsed.marbleTidyLevels),
       parts: sanitizePartIds(parsed.parts),
       equipped: sanitizeEquipped(parsed.equipped),
     };
