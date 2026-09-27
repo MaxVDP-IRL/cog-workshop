@@ -6,18 +6,22 @@
   import LightbulbBench from './lightbulb/LightbulbBench.svelte';
   import LightbulbMachine from './lightbulb/LightbulbMachine.svelte';
   import LightbulbCountUp from './lightbulb/LightbulbCountUp.svelte';
+  import MarbleBench from './marble/MarbleBench.svelte';
+  import MarbleMachine from './marble/MarbleMachine.svelte';
   import { loadProgress, saveProgress, type LoadedProgress } from '../platform/storage';
   import { speak } from '../platform/speech';
   import {
-    completeLevel, completeLightbulbLevel, equippedOrDefault, levelById, lightbulbLevelById,
-    nextLevelId, lightbulbNextLevelId, partById,
+    completeLevel, completeLightbulbLevel, completeMarbleLevel,
+    equippedOrDefault, levelById, lightbulbLevelById, marbleLevelById,
+    nextLevelId, lightbulbNextLevelId, marbleNextLevelId, partById,
     type ProgressState, type Slot,
   } from '../engine';
 
   type Screen =
     | 'home' | 'garage'
     | 'robot-bench' | 'robot-level'
-    | 'lightbulb-bench' | 'lightbulb-level' | 'lightbulb-countup';
+    | 'lightbulb-bench' | 'lightbulb-level' | 'lightbulb-countup'
+    | 'marble-bench' | 'marble-level';
 
   let progress: LoadedProgress = $state(loadProgress());
   let screen: Screen = $state('home');
@@ -42,6 +46,11 @@
   const openLightbulbLevel = (id: string) => {
     currentLevelId = id;
     screen = 'lightbulb-level';
+  };
+
+  const openMarbleLevel = (id: string) => {
+    currentLevelId = id;
+    screen = 'marble-level';
   };
 
   /** Shows the award pop-up if anything was earned. Returns whether it did. */
@@ -78,10 +87,24 @@
     else screen = 'lightbulb-bench';
   };
 
+  const marbleSolved = (piecesUsed: number) => {
+    if (!currentLevelId) return;
+    const { progress: next, earned } = completeMarbleLevel(progress, currentLevelId, piecesUsed);
+    update(next);
+    if (!award(earned)) goToNextMarbleLevel();
+  };
+
+  const goToNextMarbleLevel = () => {
+    const next = currentLevelId ? marbleNextLevelId(currentLevelId) : null;
+    if (next) currentLevelId = next;
+    else screen = 'marble-bench';
+  };
+
   const dismissAward = () => {
     awarded = [];
     if (screen === 'robot-level') goToNextRobotLevel();
     else if (screen === 'lightbulb-level') goToNextLightbulbLevel();
+    else if (screen === 'marble-level') goToNextMarbleLevel();
   };
 
   const equip = (slot: Slot, partId: string) => {
@@ -94,6 +117,7 @@
     partCount={progress.parts.length}
     onrobot={() => (screen = 'robot-bench')}
     onlightbulb={() => (screen = 'lightbulb-bench')}
+    onmarble={() => (screen = 'marble-bench')}
     ongarage={() => (screen = 'garage')}
   />
 {:else if screen === 'robot-bench'}
@@ -120,6 +144,14 @@
   />
 {:else if screen === 'lightbulb-countup'}
   <LightbulbCountUp onback={() => (screen = 'lightbulb-bench')} />
+{:else if screen === 'marble-bench'}
+  <MarbleBench {progress} onplay={openMarbleLevel} onback={() => (screen = 'home')} />
+{:else if screen === 'marble-level' && currentLevelId}
+  <MarbleMachine
+    level={marbleLevelById(currentLevelId)}
+    onsolved={marbleSolved}
+    onback={() => (screen = 'marble-bench')}
+  />
 {:else if screen === 'garage'}
   <Garage {progress} onequip={equip} onback={() => (screen = 'home')} />
 {/if}

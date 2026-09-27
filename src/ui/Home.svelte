@@ -3,11 +3,13 @@
     partCount,
     onrobot,
     onlightbulb,
+    onmarble,
     ongarage,
   }: {
     partCount: number;
     onrobot: () => void;
     onlightbulb: () => void;
+    onmarble: () => void;
     ongarage: () => void;
   } = $props();
 </script>
@@ -24,9 +26,8 @@
       <span class="glyph">💡</span>
     </button>
 
-    <button type="button" class="bench locked" disabled aria-label="marble machine, locked">
+    <button type="button" class="bench" onclick={onmarble} aria-label="marble machine">
       <span class="glyph">⚙️</span>
-      <span class="lock" aria-hidden="true">🔒</span>
     </button>
   </div>
 
@@ -74,14 +75,7 @@
   }
 
   .bench .glyph { font-size: 3.4rem; }
-  .bench:active:not(:disabled) { transform: scale(0.96); }
-  .bench.locked { opacity: 0.45; }
-
-  .lock {
-    position: absolute;
-    right: 1rem;
-    font-size: 1.6rem;
-  }
+  .bench:active { transform: scale(0.96); }
 
   .garage {
     display: flex;
