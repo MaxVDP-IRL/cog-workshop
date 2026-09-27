@@ -3,6 +3,9 @@ import { LEVELS, levelById, par } from './robot/levels';
 import {
   LEVELS as LIGHTBULB_LEVELS, levelById as lightbulbLevelById, par as lightbulbPar,
 } from './lightbulb/levels';
+import {
+  LEVELS as MARBLE_LEVELS, levelById as marbleLevelById, par as marblePar,
+} from './marble/levels';
 
 export interface ProgressState {
   version: 1;
@@ -14,6 +17,10 @@ export interface ProgressState {
   lightbulbCompletedLevels: string[];
   /** Lightbulb level ids solved in par taps or fewer. */
   lightbulbTidyLevels: string[];
+  /** Marble level ids completed at least once. */
+  marbleCompletedLevels: string[];
+  /** Marble level ids solved in par pieces or fewer. */
+  marbleTidyLevels: string[];
   /** Earned part ids, in the order they were earned. Shared across every game. */
   parts: string[];
   /** The part chosen for each garage slot. Absent means "first owned". */
@@ -26,6 +33,8 @@ export const newProgress = (): ProgressState => ({
   tidyLevels: [],
   lightbulbCompletedLevels: [],
   lightbulbTidyLevels: [],
+  marbleCompletedLevels: [],
+  marbleTidyLevels: [],
   parts: [],
   equipped: {},
 });
@@ -115,6 +124,53 @@ export const completeLightbulbLevel = (
       lightbulbTidyLevels: firstTidy
         ? [...progress.lightbulbTidyLevels, levelId]
         : progress.lightbulbTidyLevels,
+      parts: owned,
+    },
+    earned,
+  };
+};
+
+/** A marble level is playable once the previous one is complete. The first is always open. */
+export const isMarbleLevelUnlocked = (progress: ProgressState, levelId: string): boolean => {
+  const index = MARBLE_LEVELS.findIndex((l) => l.id === levelId);
+  if (index <= 0) return index === 0;
+  return progress.marbleCompletedLevels.includes(MARBLE_LEVELS[index - 1].id);
+};
+
+/**
+ * Records a solved marble level and awards parts: one for finishing, plus
+ * one more for using no more pieces than par. Deliberately a third copy of
+ * completeLevel rather than a generic over ProgressState's saved fields, so
+ * the compiler still catches a wrong-field mistake.
+ */
+export const completeMarbleLevel = (
+  progress: ProgressState,
+  levelId: string,
+  piecesUsed: number,
+): { progress: ProgressState; earned: string[] } => {
+  const level = marbleLevelById(levelId);
+  const firstCompletion = !progress.marbleCompletedLevels.includes(levelId);
+  const tidy = piecesUsed <= marblePar(level);
+  const firstTidy = tidy && !progress.marbleTidyLevels.includes(levelId);
+
+  const earned: string[] = [];
+  let owned = [...progress.parts];
+  for (let i = 0; i < (firstCompletion ? 1 : 0) + (firstTidy ? 1 : 0); i++) {
+    const next = nextUnearnedPart(owned);
+    if (!next) break;
+    owned = [...owned, next];
+    earned.push(next);
+  }
+
+  return {
+    progress: {
+      ...progress,
+      marbleCompletedLevels: firstCompletion
+        ? [...progress.marbleCompletedLevels, levelId]
+        : progress.marbleCompletedLevels,
+      marbleTidyLevels: firstTidy
+        ? [...progress.marbleTidyLevels, levelId]
+        : progress.marbleTidyLevels,
       parts: owned,
     },
     earned,
