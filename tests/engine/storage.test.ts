@@ -146,4 +146,58 @@ describe('storage', () => {
     expect(loaded.lightbulbCompletedLevels).toEqual([]);
     expect(loaded.lightbulbTidyLevels).toEqual([]);
   });
+
+  it('drops unknown marble level ids while keeping valid ones', () => {
+    store.set('cog-workshop:progress', JSON.stringify({
+      version: 1,
+      completedLevels: [],
+      tidyLevels: [],
+      lightbulbCompletedLevels: [],
+      lightbulbTidyLevels: [],
+      marbleCompletedLevels: ['m1-1', 'no-such-marble-level'],
+      marbleTidyLevels: ['m1-1', 'no-such-marble-level'],
+      parts: [],
+      equipped: {},
+    }));
+    const loaded = loadProgress();
+    expect(loaded.marbleCompletedLevels).toEqual(['m1-1']);
+    expect(loaded.marbleTidyLevels).toEqual(['m1-1']);
+  });
+
+  it('backfills marble fields on a pre-marble save without losing its progress', () => {
+    store.set('cog-workshop:progress', JSON.stringify({
+      version: 1,
+      completedLevels: ['w1-1'],
+      tidyLevels: ['w1-1'],
+      lightbulbCompletedLevels: ['lb1-1'],
+      lightbulbTidyLevels: [],
+      parts: ['head-classic', 'wheels-red'],
+      equipped: { head: 'head-classic' },
+    }));
+    const loaded = loadProgress();
+    expect(loaded.marbleCompletedLevels).toEqual([]);
+    expect(loaded.marbleTidyLevels).toEqual([]);
+    expect(loaded.completedLevels).toEqual(['w1-1']);
+    expect(loaded.tidyLevels).toEqual(['w1-1']);
+    expect(loaded.lightbulbCompletedLevels).toEqual(['lb1-1']);
+    expect(loaded.parts).toEqual(['head-classic', 'wheels-red']);
+    expect(loaded.equipped).toEqual({ head: 'head-classic' });
+  });
+
+  it('drops a valid robot id found in a marble field, and vice versa', () => {
+    store.set('cog-workshop:progress', JSON.stringify({
+      version: 1,
+      completedLevels: ['m1-1'],
+      tidyLevels: [],
+      lightbulbCompletedLevels: [],
+      lightbulbTidyLevels: [],
+      marbleCompletedLevels: ['w1-1'],
+      marbleTidyLevels: [],
+      parts: [],
+      equipped: {},
+    }));
+    const loaded = loadProgress();
+    expect(loaded.completedLevels).toEqual([]);
+    expect(loaded.marbleCompletedLevels).toEqual([]);
+  });
 });
