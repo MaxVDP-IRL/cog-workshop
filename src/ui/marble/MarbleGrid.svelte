@@ -23,6 +23,20 @@
   );
 
   const isTarget = (x: number, y: number) => level.targets.some((t) => t.x === x && t.y === y);
+
+  // Marbles sharing a cell sit side by side, so two paths meeting stay visible as two.
+  const drawn = $derived.by(() => {
+    const perCell = new Map<string, number>();
+    for (const m of marbles) perCell.set(`${m.x},${m.y}`, (perCell.get(`${m.x},${m.y}`) ?? 0) + 1);
+    const seen = new Map<string, number>();
+    return marbles.map((m) => {
+      const k = `${m.x},${m.y}`;
+      const n = perCell.get(k)!;
+      const i = seen.get(k) ?? 0;
+      seen.set(k, i + 1);
+      return { cx: m.x + 0.5 + (i - (n - 1) / 2) * 0.3, cy: m.y + 0.5 };
+    });
+  });
 </script>
 
 <svg class="grid" viewBox="0 0 {level.width} {level.height}" role="img" aria-label="the marble board">
@@ -49,8 +63,8 @@
     tick and a splitter turns one marble into two, so there's no stable
     identity to slide between cells — each tick is a flip-book frame.
   -->
-  {#each marbles as marble, i (i)}
-    <circle cx={marble.x + 0.5} cy={marble.y + 0.5} r="0.17" class="marble" />
+  {#each drawn as marble, i (i)}
+    <circle cx={marble.cx} cy={marble.cy} r="0.14" class="marble" />
   {/each}
 </svg>
 
