@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { PARTS, partById, partsInSlot, nextUnearnedPart, SLOTS } from '../../src/engine/parts';
+import { LEVELS as ROBOT_LEVELS } from '../../src/engine/robot/levels';
+import { LEVELS as LIGHTBULB_LEVELS } from '../../src/engine/lightbulb/levels';
+import { LEVELS as MARBLE_LEVELS } from '../../src/engine/marble/levels';
 
 describe('parts catalogue', () => {
   it('has unique ids', () => {
@@ -16,8 +19,10 @@ describe('parts catalogue', () => {
   });
 
   it('has at least as many parts as there are levels to earn them', () => {
-    // 15 robot + 14 lightbulb + 12 marble levels, each capable of a tidy bonus.
-    expect(PARTS.length).toBeGreaterThanOrEqual(41);
+    // One part per level across all three games. Tidy bonuses draw from the
+    // same catalogue and simply stop once it is exhausted.
+    const levelCount = ROBOT_LEVELS.length + LIGHTBULB_LEVELS.length + MARBLE_LEVELS.length;
+    expect(PARTS.length).toBeGreaterThanOrEqual(levelCount);
   });
 
   it('looks a part up by id', () => {
