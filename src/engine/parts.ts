@@ -76,6 +76,23 @@ export const PARTS: Part[] = [
   { id: 'antenna-ribbon', slot: 'antenna', glyph: '🎗️', label: 'a ribbon aerial' },
   { id: 'body-nestingdoll', slot: 'body', glyph: '🪆', label: 'a nesting-doll body' },
   { id: 'arms-trumpet', slot: 'arms', glyph: '🎺', label: 'trumpet arms' },
+  // Extra sets for the longer robot and marble packs, so a new level still
+  // pays out a part after the original three games have been tidied.
+  { id: 'head-bear', slot: 'head', glyph: '🐻', label: 'a bear head' },
+  { id: 'wheels-bike', slot: 'wheels', glyph: '🚲', label: 'bike wheels' },
+  { id: 'antenna-satellite', slot: 'antenna', glyph: '📡', label: 'a satellite aerial' },
+  { id: 'body-house', slot: 'body', glyph: '🏠', label: 'a house body' },
+  { id: 'arms-glove', slot: 'arms', glyph: '🥊', label: 'boxing-glove arms' },
+  { id: 'head-bunny', slot: 'head', glyph: '🐰', label: 'a bunny head' },
+  { id: 'wheels-scooter', slot: 'wheels', glyph: '🛴', label: 'scooter wheels' },
+  { id: 'antenna-bow', slot: 'antenna', glyph: '🎀', label: 'a bow aerial' },
+  { id: 'body-cake', slot: 'body', glyph: '🎂', label: 'a cake body' },
+  { id: 'arms-pencil', slot: 'arms', glyph: '✏️', label: 'pencil arms' },
+  { id: 'head-tiger', slot: 'head', glyph: '🐯', label: 'a tiger head' },
+  { id: 'wheels-ski', slot: 'wheels', glyph: '🎿', label: 'ski wheels' },
+  { id: 'antenna-music', slot: 'antenna', glyph: '🎵', label: 'a music aerial' },
+  { id: 'body-book', slot: 'body', glyph: '📚', label: 'a book body' },
+  { id: 'arms-wand', slot: 'arms', glyph: '🪄', label: 'magic-wand arms' },
 ];
 
 export const partById = (id: string): Part => {

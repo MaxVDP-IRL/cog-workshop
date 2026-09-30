@@ -87,4 +87,24 @@ describe('marble level content', () => {
   it('throws on an unknown id', () => {
     expect(() => levelById('nope')).toThrow();
   });
+
+  it('puts at most one solution piece on each cell and spawns on the top row', () => {
+    for (const level of LEVELS) {
+      const keys = level.solution.map((p) => `${p.cell.x},${p.cell.y}`);
+      expect(new Set(keys).size, level.id).toBe(keys.length);
+      expect(level.spawn.y, level.id).toBe(0);
+    }
+  });
+
+  it('packs seven, six, and five levels across the three worlds', () => {
+    const count = (world: number) => LEVELS.filter((l) => l.world === world).length;
+    expect(count(1)).toBe(7);
+    expect(count(2)).toBe(6);
+    expect(count(3)).toBe(5);
+    const highCup = levelById('m1-6');
+    expect(highCup.targets.some((t) => t.y < highCup.height - 1)).toBe(true);
+    const finale = levelById('m3-5');
+    expect(finale.targets).toHaveLength(4);
+    expect(finale.height).toBe(6);
+  });
 });

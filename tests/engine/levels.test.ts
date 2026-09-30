@@ -90,4 +90,29 @@ describe('level content', () => {
     while (id) { count++; id = nextLevelId(id); }
     expect(count).toBe(LEVELS.length);
   });
+
+  it('keeps repeat tiles buildable on the phone pad', () => {
+    // The pad wraps one move, or the last two plain moves, and the dial
+    // only climbs from 2 up to 9. A solution outside that cannot be entered.
+    for (const level of LEVELS) {
+      for (const tile of level.solution) {
+        if (tile.kind !== 'repeat') continue;
+        expect(tile.body.length, `${level.id} repeat body`).toBeGreaterThanOrEqual(1);
+        expect(tile.body.length, `${level.id} repeat body`).toBeLessThanOrEqual(2);
+        expect(tile.times, `${level.id} repeat times`).toBeGreaterThanOrEqual(2);
+        expect(tile.times, `${level.id} repeat times`).toBeLessThanOrEqual(9);
+      }
+    }
+  });
+
+  it('packs six, six, six, and five levels across the four worlds', () => {
+    const count = (world: number) => LEVELS.filter((l) => l.world === world).length;
+    expect(count(1)).toBe(6);
+    expect(count(2)).toBe(6);
+    expect(count(3)).toBe(6);
+    expect(count(4)).toBe(5);
+    const arrows = new Set(LEVELS.filter((l) => l.world === 1).flatMap((l) => l.arrows));
+    expect([...arrows].sort()).toEqual(['down', 'left', 'right', 'up']);
+    expect(levelById('w4-4').solutionMini).toHaveLength(3);
+  });
 });
