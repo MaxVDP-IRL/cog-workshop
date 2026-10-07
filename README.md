@@ -12,7 +12,7 @@ that one teaches number sense, this one teaches computing.
 
 🤖💡⚙️ **v1 complete** — the shared shell and all three games: Teach the
 Robot (23 levels, four worlds), the Lightbulb Machine (14 levels, four
-stages, plus a counting-pattern bonus mode), and the Marble Machine (18
+stages, plus a counting-pattern bonus mode), and the Marble Machine (24
 levels, three worlds).
 
 **Play:** https://maxvdp-irl.github.io/cog-workshop/

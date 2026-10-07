@@ -96,15 +96,46 @@ describe('marble level content', () => {
     }
   });
 
-  it('packs seven, six, and five levels across the three worlds', () => {
+  it('packs seven, six, and eleven levels across the three worlds', () => {
     const count = (world: number) => LEVELS.filter((l) => l.world === world).length;
     expect(count(1)).toBe(7);
     expect(count(2)).toBe(6);
-    expect(count(3)).toBe(5);
+    expect(count(3)).toBe(11);
     const highCup = levelById('m1-6');
     expect(highCup.targets.some((t) => t.y < highCup.height - 1)).toBe(true);
-    const finale = levelById('m3-5');
-    expect(finale.targets).toHaveLength(4);
-    expect(finale.height).toBe(6);
+    const fourCups = levelById('m3-5');
+    expect(fourCups.targets).toHaveLength(4);
+    expect(fourCups.height).toBe(6);
+    const finale = levelById('m3-11');
+    expect(finale.targets).toHaveLength(5);
+    expect(finale.targets.some((t) => t.y < finale.height - 1)).toBe(true);
+  });
+
+  it('keeps the original eighteen levels first so existing saves still unlock in order', () => {
+    const original = [
+      'm1-1', 'm1-2', 'm1-3', 'm1-4', 'm1-5', 'm1-6', 'm1-7',
+      'm2-1', 'm2-2', 'm2-3', 'm2-4', 'm2-5', 'm2-6',
+      'm3-1', 'm3-2', 'm3-3', 'm3-4', 'm3-5',
+    ];
+    expect(LEVELS.slice(0, original.length).map((l) => l.id)).toEqual(original);
+    expect(nextLevelId('m3-5')).toBe('m3-6');
+    expect(nextLevelId('m3-11')).toBeNull();
+  });
+
+  it('grows past four floor cups: later levels add height, folds, or a fifth cup', () => {
+    const later = ['m3-6', 'm3-7', 'm3-8', 'm3-9', 'm3-10', 'm3-11'].map(levelById);
+    for (const level of later) {
+      expect(level.world).toBe(3);
+      expect(level.width).toBeLessThanOrEqual(7);
+      expect(level.height).toBeLessThanOrEqual(7);
+      expect(level.slots).toBeGreaterThanOrEqual(level.solution.length);
+      expect(level.slots).toBeLessThanOrEqual(12);
+    }
+    expect(levelById('m3-6').targets.some((t) => t.y < 6)).toBe(true);
+    expect(levelById('m3-8').targets).toHaveLength(5);
+    expect(levelById('m3-9').targets.filter((t) => t.y === 6).map((t) => t.x)).toEqual([1, 2, 6]);
+    const stacked = levelById('m3-10');
+    const column2 = stacked.targets.filter((t) => t.x === 2).map((t) => t.y).sort();
+    expect(column2).toEqual([4, 6]);
   });
 });
