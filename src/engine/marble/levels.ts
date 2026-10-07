@@ -186,10 +186,10 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    // The finale: unlike m3-1/m3-2 (only one first-level branch splits
-    // again), BOTH branches split a second time here — 1 marble becomes 4,
-    // with two of those four naturally landing on the same bucket (a real,
-    // deliberate "two different paths, one place" moment, not a bug).
+    // Unlike m3-1/m3-2 (only one first-level branch splits again), BOTH
+    // branches split a second time here — 1 marble becomes 4, with two of
+    // those four naturally landing on the same bucket (a real, deliberate
+    // "two different paths, one place" moment, not a bug).
     id: 'm3-3', world: 3, width: 7, height: 5,
     spawn: { x: 3, y: 0 }, targets: [{ x: 1, y: 4 }, { x: 3, y: 4 }, { x: 5, y: 4 }],
     slots: 8, palette: ['ramp-left', 'ramp-right', 'splitter'],
@@ -236,6 +236,135 @@ export const LEVELS: Level[] = [
       { cell: { x: 2, y: 5 }, kind: 'bucket' },
       { cell: { x: 4, y: 5 }, kind: 'bucket' },
       { cell: { x: 6, y: 5 }, kind: 'bucket' },
+    ],
+  },
+  {
+    // Same four-way split as m3-5, but the two inner cups sit up high.
+    // The outer marbles keep falling into the corner cups.
+    id: 'm3-6', world: 3, width: 7, height: 7,
+    spawn: { x: 3, y: 0 }, targets: [
+      { x: 0, y: 6 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 6, y: 6 },
+    ],
+    slots: 11, palette: ['ramp-left', 'ramp-right', 'splitter'],
+    solution: [
+      { cell: { x: 3, y: 0 }, kind: 'splitter' },
+      { cell: { x: 2, y: 1 }, kind: 'ramp-left' },
+      { cell: { x: 4, y: 1 }, kind: 'ramp-right' },
+      { cell: { x: 1, y: 2 }, kind: 'splitter' },
+      { cell: { x: 5, y: 2 }, kind: 'splitter' },
+      { cell: { x: 2, y: 3 }, kind: 'bucket' },
+      { cell: { x: 4, y: 3 }, kind: 'bucket' },
+      { cell: { x: 0, y: 6 }, kind: 'bucket' },
+      { cell: { x: 6, y: 6 }, kind: 'bucket' },
+    ],
+  },
+  {
+    // The marble has to step right before it splits, and the four cups
+    // are not a mirror: one is caught early, one a row later, two on the floor.
+    id: 'm3-7', world: 3, width: 7, height: 7,
+    spawn: { x: 2, y: 0 }, targets: [
+      { x: 0, y: 5 }, { x: 2, y: 6 }, { x: 4, y: 4 }, { x: 6, y: 6 },
+    ],
+    slots: 12, palette: ['ramp-left', 'ramp-right', 'splitter'],
+    solution: [
+      { cell: { x: 2, y: 0 }, kind: 'ramp-right' },
+      { cell: { x: 3, y: 1 }, kind: 'splitter' },
+      { cell: { x: 2, y: 2 }, kind: 'ramp-left' },
+      { cell: { x: 4, y: 2 }, kind: 'ramp-right' },
+      { cell: { x: 1, y: 3 }, kind: 'splitter' },
+      { cell: { x: 5, y: 3 }, kind: 'splitter' },
+      { cell: { x: 4, y: 4 }, kind: 'bucket' },
+      { cell: { x: 0, y: 5 }, kind: 'bucket' },
+      { cell: { x: 2, y: 6 }, kind: 'bucket' },
+      { cell: { x: 6, y: 6 }, kind: 'bucket' },
+    ],
+  },
+  {
+    // One marble becomes five. Every cup is on the floor, with a gap
+    // before each corner so the middle three sit together.
+    id: 'm3-8', world: 3, width: 7, height: 7,
+    spawn: { x: 3, y: 0 }, targets: [
+      { x: 0, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 6, y: 6 },
+    ],
+    slots: 12, palette: ['ramp-left', 'ramp-right', 'splitter'],
+    solution: [
+      { cell: { x: 3, y: 0 }, kind: 'splitter' },
+      { cell: { x: 2, y: 1 }, kind: 'splitter' },
+      { cell: { x: 4, y: 1 }, kind: 'ramp-right' },
+      { cell: { x: 1, y: 2 }, kind: 'splitter' },
+      { cell: { x: 5, y: 2 }, kind: 'splitter' },
+      { cell: { x: 0, y: 6 }, kind: 'bucket' },
+      { cell: { x: 2, y: 6 }, kind: 'bucket' },
+      { cell: { x: 3, y: 6 }, kind: 'bucket' },
+      { cell: { x: 4, y: 6 }, kind: 'bucket' },
+      { cell: { x: 6, y: 6 }, kind: 'bucket' },
+    ],
+  },
+  {
+    // After the four-way split, one marble is turned back inward so two
+    // floor cups sit next to each other. A third cup is caught up high.
+    id: 'm3-9', world: 3, width: 7, height: 7,
+    spawn: { x: 3, y: 0 }, targets: [
+      { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 4, y: 4 }, { x: 6, y: 6 },
+    ],
+    slots: 12, palette: ['ramp-left', 'ramp-right', 'splitter'],
+    solution: [
+      { cell: { x: 3, y: 0 }, kind: 'splitter' },
+      { cell: { x: 2, y: 1 }, kind: 'ramp-left' },
+      { cell: { x: 4, y: 1 }, kind: 'ramp-right' },
+      { cell: { x: 1, y: 2 }, kind: 'splitter' },
+      { cell: { x: 5, y: 2 }, kind: 'splitter' },
+      { cell: { x: 0, y: 3 }, kind: 'ramp-right' },
+      { cell: { x: 4, y: 4 }, kind: 'bucket' },
+      { cell: { x: 1, y: 6 }, kind: 'bucket' },
+      { cell: { x: 2, y: 6 }, kind: 'bucket' },
+      { cell: { x: 6, y: 6 }, kind: 'bucket' },
+    ],
+  },
+  {
+    // A long diagonal from the top-left corner, then two more splits.
+    // Column 2 has two cups: one catches a marble halfway, and a later
+    // marble — folded back from the right — lands in the floor cup below.
+    id: 'm3-10', world: 3, width: 7, height: 7,
+    spawn: { x: 0, y: 0 }, targets: [
+      { x: 0, y: 6 }, { x: 2, y: 4 }, { x: 2, y: 6 }, { x: 5, y: 6 },
+    ],
+    slots: 12, palette: ['ramp-left', 'ramp-right', 'splitter'],
+    solution: [
+      { cell: { x: 0, y: 0 }, kind: 'ramp-right' },
+      { cell: { x: 1, y: 1 }, kind: 'ramp-right' },
+      { cell: { x: 2, y: 2 }, kind: 'splitter' },
+      { cell: { x: 1, y: 3 }, kind: 'splitter' },
+      { cell: { x: 3, y: 3 }, kind: 'ramp-right' },
+      { cell: { x: 4, y: 4 }, kind: 'splitter' },
+      { cell: { x: 2, y: 4 }, kind: 'bucket' },
+      { cell: { x: 3, y: 5 }, kind: 'ramp-left' },
+      { cell: { x: 0, y: 6 }, kind: 'bucket' },
+      { cell: { x: 2, y: 6 }, kind: 'bucket' },
+      { cell: { x: 5, y: 6 }, kind: 'bucket' },
+    ],
+  },
+  {
+    // Five cups again, but only the middle ones reach the floor. The two
+    // corners are caught up high, and the center cup sits one row above
+    // the floor. The opening ramp means m3-8's layout does not drop in.
+    id: 'm3-11', world: 3, width: 7, height: 7,
+    spawn: { x: 2, y: 0 }, targets: [
+      { x: 0, y: 4 }, { x: 2, y: 6 }, { x: 3, y: 5 }, { x: 4, y: 6 }, { x: 6, y: 4 },
+    ],
+    slots: 12, palette: ['ramp-left', 'ramp-right', 'splitter'],
+    solution: [
+      { cell: { x: 2, y: 0 }, kind: 'ramp-right' },
+      { cell: { x: 3, y: 1 }, kind: 'splitter' },
+      { cell: { x: 2, y: 2 }, kind: 'splitter' },
+      { cell: { x: 4, y: 2 }, kind: 'ramp-right' },
+      { cell: { x: 1, y: 3 }, kind: 'splitter' },
+      { cell: { x: 5, y: 3 }, kind: 'splitter' },
+      { cell: { x: 0, y: 4 }, kind: 'bucket' },
+      { cell: { x: 6, y: 4 }, kind: 'bucket' },
+      { cell: { x: 3, y: 5 }, kind: 'bucket' },
+      { cell: { x: 2, y: 6 }, kind: 'bucket' },
+      { cell: { x: 4, y: 6 }, kind: 'bucket' },
     ],
   },
 ];
